@@ -1,8 +1,16 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Young Booth Gallery</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root{
   --bg:#f6f5f2; --surface:#ffffff; --surface-2:#efece6; --border:#e5dfd5;
@@ -457,6 +465,8 @@ html{scroll-behavior:smooth}
 }
 </style>
 
+</head>
+<body>
 <header class="hdr">
   <div class="hdr-in">
     <div class="brand" onclick="location.hash='#/'">
@@ -517,8 +527,8 @@ html{scroll-behavior:smooth}
 const $=(s,r=document)=>r.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-const isReal=id=>typeof id==='string'&&/^[0-9a-f]{32}$/.test(id);
-const blobUrl=id=>'/_blob/'+id;
+const isReal=id=>typeof id==='string'&&(/^https?:\/\//.test(id)||/^[0-9a-f]{32}$/.test(id));
+const blobUrl=id=>/^https?:\/\//.test(id)?id:'/_blob/'+id;
 function hash(str){let h=0;for(let i=0;i<str.length;i++){h=(h*31+str.charCodeAt(i))|0;}return Math.abs(h);}
 function phStyle(seed){const n=hash(String(seed||'x'));const h1=n%360,h2=(h1+42)%360;
   return `--h1:${h1};--h2:${h2}`;}
@@ -553,52 +563,120 @@ $('#themeBtn').onclick=()=>{const next=curTheme()==='dark'?'light':'dark';
 const cap={db:null,assets:null,user:null,downloads:null};
 let isAdmin=false, dbReady=false, previewGuest=false, loggedIn=false;
 const canAdmin=()=>isAdmin&&!previewGuest;
-const ADMIN_USER='admin', ADMIN_PASS='123456@';
 const LOGIN_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/></svg>';
 const LOGOUT_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>';
-function isAuthed(){try{return localStorage.getItem('yb-auth')==='ok';}catch(e){return false;}}
+
+/* ===================== CẤU HÌNH — điền sau khi tạo Supabase ===================== */
+const SUPABASE_URL='https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY='YOUR-ANON-KEY';
+const EMAILJS={publicKey:'',serviceId:'',templateId:''}; // (tuỳ chọn) tự gửi email đơn đặt booth
+/* =============================================================================== */
+
+const _sb=(window.supabase&&SUPABASE_URL.indexOf('YOUR-')<0)?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+function _row2obj(r){return (r&&r.data)?r.data:{};}
+function _obj2row(table,id,obj){
+  if(table==='albums')return {id,created_at:obj.createdAt||0,data:obj};
+  if(table==='reviews')return {id,album_id:obj.albumId||null,at:obj.at||0,data:obj};
+  if(table==='bookings')return {id,at:obj.at||0,data:obj};
+  return {id,data:obj};
+}
+function sbDoc(path){const seg=path.split('/'),table=seg[0],id=seg[1];
+  return {
+    id:id,
+    async get(){if(!_sb)return{id,exists:false,data:()=>undefined};
+      const {data}=await _sb.from(table).select('*').eq('id',id).maybeSingle();
+      return {id,exists:!!data,data:()=>data?_row2obj(data):undefined};},
+    onSnapshot(next,err){if(!_sb){next({id,exists:false,data:()=>undefined});return ()=>{};}
+      let alive=true;
+      const emit=async()=>{if(!alive)return;const {data,error}=await _sb.from(table).select('*').eq('id',id).maybeSingle();
+        if(error){err&&err(error);return;}next({id,exists:!!data,data:()=>data?_row2obj(data):undefined});};
+      emit();
+      const ch=_sb.channel('d_'+table+'_'+id+'_'+Math.random().toString(36).slice(2)).on('postgres_changes',{event:'*',schema:'public',table:table,filter:'id=eq.'+id},emit).subscribe();
+      const iv=setInterval(emit,20000);
+      return ()=>{alive=false;clearInterval(iv);try{_sb.removeChannel(ch);}catch(e){}};},
+    async set(obj){if(!_sb)throw new Error('no-config');const {error}=await _sb.from(table).upsert(_obj2row(table,id,obj));if(error)throw error;},
+    async update(patch){if(!_sb)throw new Error('no-config');
+      const {data}=await _sb.from(table).select('*').eq('id',id).maybeSingle();
+      const merged=Object.assign({},_row2obj(data),patch);
+      const {error}=await _sb.from(table).upsert(_obj2row(table,id,merged));if(error)throw error;},
+    async delete(){if(!_sb)return;await _sb.from(table).delete().eq('id',id);}
+  };
+}
+function sbCol(table){let _f=null;
+  const api={
+    where(field,op,val){_f={field:field,val:val};return api;},
+    orderBy(){return api;},
+    doc(id){return sbDoc(table+'/'+(id||(table[0]+Date.now().toString(36)+Math.random().toString(36).slice(2,6))));},
+    async add(obj){if(!_sb)throw new Error('no-config');
+      const id=obj.id||(Date.now().toString(36)+Math.random().toString(36).slice(2,8));
+      const {error}=await _sb.from(table).upsert(_obj2row(table,id,obj));if(error)throw error;return {id};},
+    onSnapshot(next,err){if(!_sb){next({docs:[]});return ()=>{};}
+      let alive=true;
+      const emit=async()=>{if(!alive)return;
+        let q=_sb.from(table).select('*');
+        if(_f)q=q.eq(_f.field==='albumId'?'album_id':_f.field,_f.val);
+        if(table==='albums')q=q.order('created_at',{ascending:false});
+        const {data,error}=await q;if(error){err&&err(error);return;}
+        next({docs:(data||[]).map(function(r){return {id:r.id,exists:true,data:function(){return _row2obj(r);}};})});};
+      emit();
+      const ch=_sb.channel('c_'+table+'_'+Math.random().toString(36).slice(2)).on('postgres_changes',{event:'*',schema:'public',table:table},emit).subscribe();
+      const iv=setInterval(emit,20000);
+      return ()=>{alive=false;clearInterval(iv);try{_sb.removeChannel(ch);}catch(e){}};}
+  };return api;
+}
+const SB={collection:function(p){return sbCol(p.split('/')[0]);},doc:function(p){return sbDoc(p);}};
+const SBAssets={
+  async upload(file){if(!_sb)throw new Error('no-config');
+    const ext=((file.name||'x.jpg').split('.').pop()||'jpg').toLowerCase();
+    const path='img/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+    const up=await _sb.storage.from('photos').upload(path,file,{contentType:file.type||'image/jpeg',upsert:false});
+    if(up.error)throw up.error;const {data}=_sb.storage.from('photos').getPublicUrl(path);
+    return {id:data.publicUrl,url:data.publicUrl};},
+  async delete(ref){try{const i=String(ref).indexOf('/photos/');if(_sb&&i>=0)await _sb.storage.from('photos').remove([String(ref).slice(i+8)]);}catch(e){}return {deleted:true};},
+  async list(){return {assets:[],usage:{}};}
+};
+const SBDownloads={async save(o){
+  const blob=(o.data instanceof Blob)?o.data:new Blob([o.data]);const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=o.filename||'download';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){try{URL.revokeObjectURL(url);}catch(e){}},4000);return {status:'saved'};}};
+async function refreshSession(){try{if(!_sb){loggedIn=false;isAdmin=false;return;}
+  const {data}=await _sb.auth.getSession();loggedIn=!!(data&&data.session);isAdmin=loggedIn;}catch(e){loggedIn=false;isAdmin=false;}}
+if(_sb){_sb.auth.onAuthStateChange(function(_e,session){loggedIn=!!session;isAdmin=loggedIn;
+  try{syncAdminUI();}catch(e){}try{if(loggedIn&&dbReady&&!bookingsUnsub)subscribeBookings();}catch(e){}try{render();}catch(e){}});}
 function openLogin(){
   const ov=el('div','overlay','');
   ov.innerHTML=`<div class="modal" style="width:min(380px,100%)">
     <div class="bk-hero"><div class="bk-emoji">🔐</div>
       <h3>Đăng nhập quản trị</h3><p class="sub">Dành cho quản trị viên Young Booth</p></div>
-    <div class="field"><label>Tên đăng nhập</label><input id="lgUser" autocomplete="username" placeholder="admin"></div>
+    <div class="field"><label>Email</label><input id="lgUser" type="email" autocomplete="username" placeholder="admin@youngbooth.vn"></div>
     <div class="field"><label>Mật khẩu</label><input id="lgPass" type="password" autocomplete="current-password" placeholder="••••••••"></div>
     <div class="mrow"><button class="btn ghost" id="lgCancel">Hủy</button>
       <button class="btn primary" id="lgOk">Đăng nhập</button></div></div>`;
   document.body.appendChild(ov);
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
   $('#lgCancel',ov).onclick=()=>ov.remove();
-  const submit=()=>{
-    const u=$('#lgUser',ov).value.trim(),p=$('#lgPass',ov).value;
-    if(u===ADMIN_USER&&p===ADMIN_PASS){
-      try{localStorage.setItem('yb-auth','ok');}catch(e){}
-      loggedIn=true;isAdmin=true;previewGuest=false;
-      if(cap.db&&!bookingsUnsub)subscribeBookings();
-      ov.remove();syncAdminUI();render();toast('Đăng nhập thành công 🎉');
-    }else toast('Sai tên đăng nhập hoặc mật khẩu');
+  const submit=async()=>{
+    if(!_sb){toast('Chưa cấu hình Supabase');return;}
+    const email=$('#lgUser',ov).value.trim(),password=$('#lgPass',ov).value;
+    if(!email||!password){toast('Nhập email và mật khẩu');return;}
+    const btn=$('#lgOk',ov);btn.disabled=true;btn.textContent='Đang đăng nhập…';
+    const {error}=await _sb.auth.signInWithPassword({email:email,password:password});
+    if(error){btn.disabled=false;btn.textContent='Đăng nhập';toast('Sai email hoặc mật khẩu');return;}
+    ov.remove();toast('Đăng nhập thành công 🎉');
   };
   $('#lgOk',ov).onclick=submit;
   $('#lgPass',ov).addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
   $('#lgUser',ov).focus();
 }
 function logout(){
-  try{localStorage.removeItem('yb-auth');}catch(e){}
+  if(_sb)_sb.auth.signOut();
   loggedIn=false;isAdmin=false;previewGuest=false;
   syncAdminUI();render();toast('Đã đăng xuất');
 }
 async function boot(){
   initTheme();
-  if(window.claude&&window.claude.use){
-    const [db,assets,user,downloads]=await Promise.all([
-      claude.use('db').catch(()=>null),
-      claude.use('assets').catch(()=>null),
-      claude.use('user').catch(()=>null),
-      claude.use('downloads').catch(()=>null),
-    ]);
-    cap.db=db;cap.assets=assets;cap.user=user;cap.downloads=downloads;
-    if(user){try{state.uid=await user.id();}catch(e){}}
-  }
+  cap.db=SB;cap.assets=SBAssets;cap.downloads=SBDownloads;
+  await refreshSession();
   const eye=$('#eyeBtn');
   eye.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
   eye.onclick=()=>setPreview(!previewGuest);
@@ -608,7 +686,7 @@ async function boot(){
   cfg.onclick=openSettings;
   $('#inboxBtn').onclick=openInbox;
   $('#authBtn').onclick=()=>loggedIn?logout():openLogin();
-  loggedIn=isAuthed();isAdmin=loggedIn;
+  /* phiên đăng nhập lấy từ Supabase (refreshSession/onAuthStateChange) */
   syncAdminUI();
   if(cap.db){dbReady=true;subscribeAlbums();subscribeSettings();if(loggedIn)subscribeBookings();}
   else{render();}
@@ -853,6 +931,9 @@ function openBooking(){
 }
 function sendBookingEmail(d){
   const email=((state.settings&&state.settings.email)||'').trim();
+  if(EMAILJS.publicKey&&EMAILJS.serviceId&&EMAILJS.templateId&&window.emailjs){
+    try{emailjs.send(EMAILJS.serviceId,EMAILJS.templateId,{to_email:email,name:d.name,phone:d.phone,event_type:d.eventType||'',guests:d.guests||'',budget:d.budget||'',date:d.date||'',location:d.location||'',message:d.message||''},{publicKey:EMAILJS.publicKey});return;}catch(e){console.warn(e);}
+  }
   if(!email)return;
   const subj=`[Đặt booth] ${d.name}${d.eventType?' — '+d.eventType:''}`;
   const body=`Tên: ${d.name}\nSố điện thoại: ${d.phone}\nLoại sự kiện: ${d.eventType||'(chưa chọn)'}\n`
@@ -1361,3 +1442,6 @@ $('#q').addEventListener('input',e=>{state.query=e.target.value;if(!state.albumI
 /* ============ go ============ */
 boot().then(route);
 </script>
+
+</body>
+</html>
