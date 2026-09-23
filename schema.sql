@@ -75,3 +75,6 @@ create policy "photos public read"  on storage.objects for select using (bucket_
 create policy "photos admin insert" on storage.objects for insert to authenticated with check (bucket_id = 'photos');
 create policy "photos admin update" on storage.objects for update to authenticated using (bucket_id = 'photos');
 create policy "photos admin delete" on storage.objects for delete to authenticated using (bucket_id = 'photos');
+
+-- 6) Làm mới cache API (PostgREST)
+notify pgrst, 'reload schema';
