@@ -49,7 +49,7 @@ a{color:inherit;text-decoration:none}
   backdrop-filter:saturate(1.4) blur(14px);
   border-bottom:1px solid var(--border);}
 .hdr-in{max-width:1240px;margin:0 auto;padding:12px 20px;
-  display:flex;align-items:center;gap:16px;}
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .brand{display:flex;align-items:center;gap:11px;cursor:pointer;flex:0 0 auto}
 .logo{width:42px;height:42px;flex:0 0 auto}
 .logo svg{width:100%;height:100%;display:block}
@@ -88,7 +88,7 @@ a{color:inherit;text-decoration:none}
 
 /* ---------- layout ---------- */
 .wrap{max-width:1240px;margin:0 auto;padding:0 20px}
-.hero{padding:56px 0 30px;max-width:900px}
+.hero{padding:32px 0 30px;max-width:900px}
 .hero .kick{font-family:var(--mono);font-size:12px;letter-spacing:.22em;
   color:var(--accent);text-transform:uppercase}
 .hero h1{font-family:var(--disp);font-weight:800;letter-spacing:-.03em;
@@ -347,6 +347,58 @@ html{scroll-behavior:smooth}
 .bki-acts .btn{padding:7px 12px;font-size:13px}
 @media(max-width:820px){.foot-grid{grid-template-columns:1fr 1fr;gap:28px}}
 @media(max-width:520px){.foot-grid{grid-template-columns:1fr;gap:26px}.frow2{flex-direction:column;gap:0}}
+/* top nav */
+.topnav{display:flex;gap:2px;flex:0 0 auto}
+.topnav a{padding:8px 12px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);white-space:nowrap}
+.topnav a:hover{color:var(--accent);background:var(--surface-2)}
+.topnav a.active{color:var(--accent);background:var(--surface-2)}
+@media(max-width:560px){.topnav a{padding:7px 9px;font-size:13px}}
+/* pricing */
+.phead{padding:44px 0 22px;max-width:760px}
+.phead .kick{font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--accent);text-transform:uppercase}
+.ptitle{font-family:var(--disp);font-weight:800;letter-spacing:-.02em;font-size:clamp(28px,5.5vw,46px);line-height:1.05;margin:12px 0 0;color:var(--text);text-wrap:balance}
+.phead p{color:var(--muted);margin:12px 0 0;font-size:16px}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:6px 0 10px}
+@media(max-width:920px){.tiers{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.tiers{grid-template-columns:1fr}}
+.tier{position:relative;border:1px solid var(--border);border-radius:18px;background:var(--surface);
+  padding:0 20px 20px;display:flex;flex-direction:column;box-shadow:var(--shadow-sm);
+  transition:transform .18s,box-shadow .18s}
+.tier:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
+.tier.pop{transform:scale(1.045);z-index:2;animation:popGlow 2.6s ease-in-out infinite}
+.tier.pop:hover{transform:scale(1.045) translateY(-5px)}
+@keyframes popGlow{
+  0%,100%{box-shadow:0 0 0 2px var(--tc),0 14px 32px color-mix(in srgb,var(--tc) 30%,transparent)}
+  50%{box-shadow:0 0 0 3px var(--tc),0 22px 54px color-mix(in srgb,var(--tc) 55%,transparent)}}
+@media(max-width:520px){.tier.pop{transform:none}.tier.pop:hover{transform:translateY(-5px)}}
+.tier-pop{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--tc);color:#fff;
+  font-size:11px;font-weight:700;padding:4px 13px;border-radius:999px;font-family:var(--mono);letter-spacing:.04em;z-index:3;
+  box-shadow:0 4px 12px color-mix(in srgb,var(--tc) 55%,transparent);animation:popBadge 2.6s ease-in-out infinite}
+@keyframes popBadge{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+.tier-head{display:flex;align-items:center;gap:10px;background:var(--tc);color:#fff;
+  margin:0 -20px;padding:16px 18px;border-radius:18px 18px 0 0}
+.tier-head h3{font-family:var(--disp);font-weight:800;font-size:18px;margin:0}
+.tier-ic{font-size:20px;margin-left:auto}
+.tier-price{font-family:var(--disp);font-weight:800;font-size:25px;color:#fff;text-align:center;
+  background:var(--tc);border-radius:12px;padding:11px;margin:16px 0}
+.tier-feats{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px;flex:1}
+.tier-feats li{position:relative;padding-left:26px;font-size:14px;line-height:1.45}
+.tier-feats li::before{content:"✓";position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;
+  background:color-mix(in srgb,var(--tc) 16%,transparent);color:var(--tc);font-size:11px;font-weight:800;
+  display:grid;place-items:center}
+.tier-btn{margin-top:16px;background:var(--tc);color:#fff;border-color:var(--tc);justify-content:center}
+.tier-btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.tier-note{text-align:center;font-size:12px;color:var(--muted);margin-top:11px;font-style:italic}
+.xgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;padding-bottom:64px}
+@media(max-width:920px){.xgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.xgrid{grid-template-columns:1fr}}
+.xcard{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;box-shadow:var(--shadow-sm)}
+.xcard h4{font-family:var(--disp);font-size:14px;margin:0;color:var(--accent);letter-spacing:.02em}
+.xsub{font-size:11px;color:var(--muted);margin-top:2px}
+.xrows{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.xrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding-bottom:7px;border-bottom:1px dashed var(--border)}
+.xrow:last-child{border-bottom:0;padding-bottom:0}
+.xrow b{color:var(--accent);font-family:var(--mono);white-space:nowrap}
 
 /* ---------- modal ---------- */
 .overlay{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);
@@ -427,6 +479,10 @@ html{scroll-behavior:smooth}
       </svg></span>
       <div><b>YOUNG BOOTH</b><span class="tag">Bắt trọn khoảnh khắc</span></div>
     </div>
+    <nav class="topnav">
+      <a id="navHome" href="#/">Trang chủ</a>
+      <a id="navPrice" href="#/pricing">Báo giá</a>
+    </nav>
     <div class="hdr-spacer"></div>
     <label class="search" id="searchBox">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
@@ -438,6 +494,7 @@ html{scroll-behavior:smooth}
       <span class="ibadge" id="ibadge" hidden>0</span></button>
     <button class="iconbtn" id="cfgBtn" title="Cấu hình liên hệ" aria-label="Cấu hình liên hệ" hidden></button>
     <button class="iconbtn" id="eyeBtn" title="Xem như Khách" aria-label="Xem như Khách" hidden></button>
+    <button class="iconbtn" id="authBtn" title="Đăng nhập quản trị" aria-label="Đăng nhập quản trị"></button>
     <button class="iconbtn" id="themeBtn" title="Đổi giao diện" aria-label="Đổi giao diện"></button>
   </div>
 </header>
@@ -494,8 +551,42 @@ $('#themeBtn').onclick=()=>{const next=curTheme()==='dark'?'light':'dark';
 
 /* ============ capabilities ============ */
 const cap={db:null,assets:null,user:null,downloads:null};
-let isAdmin=false, dbReady=false, previewGuest=false;
+let isAdmin=false, dbReady=false, previewGuest=false, loggedIn=false;
 const canAdmin=()=>isAdmin&&!previewGuest;
+const ADMIN_USER='admin', ADMIN_PASS='123456@';
+const LOGIN_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/></svg>';
+const LOGOUT_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>';
+function isAuthed(){try{return localStorage.getItem('yb-auth')==='ok';}catch(e){return false;}}
+function openLogin(){
+  const ov=el('div','overlay','');
+  ov.innerHTML=`<div class="modal" style="width:min(380px,100%)">
+    <div class="bk-hero"><div class="bk-emoji">🔐</div>
+      <h3>Đăng nhập quản trị</h3><p class="sub">Dành cho quản trị viên Young Booth</p></div>
+    <div class="field"><label>Tên đăng nhập</label><input id="lgUser" autocomplete="username" placeholder="admin"></div>
+    <div class="field"><label>Mật khẩu</label><input id="lgPass" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <div class="mrow"><button class="btn ghost" id="lgCancel">Hủy</button>
+      <button class="btn primary" id="lgOk">Đăng nhập</button></div></div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();});
+  $('#lgCancel',ov).onclick=()=>ov.remove();
+  const submit=()=>{
+    const u=$('#lgUser',ov).value.trim(),p=$('#lgPass',ov).value;
+    if(u===ADMIN_USER&&p===ADMIN_PASS){
+      try{localStorage.setItem('yb-auth','ok');}catch(e){}
+      loggedIn=true;isAdmin=true;previewGuest=false;
+      if(cap.db&&!bookingsUnsub)subscribeBookings();
+      ov.remove();syncAdminUI();render();toast('Đăng nhập thành công 🎉');
+    }else toast('Sai tên đăng nhập hoặc mật khẩu');
+  };
+  $('#lgOk',ov).onclick=submit;
+  $('#lgPass',ov).addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
+  $('#lgUser',ov).focus();
+}
+function logout(){
+  try{localStorage.removeItem('yb-auth');}catch(e){}
+  loggedIn=false;isAdmin=false;previewGuest=false;
+  syncAdminUI();render();toast('Đã đăng xuất');
+}
 async function boot(){
   initTheme();
   if(window.claude&&window.claude.use){
@@ -506,21 +597,20 @@ async function boot(){
       claude.use('downloads').catch(()=>null),
     ]);
     cap.db=db;cap.assets=assets;cap.user=user;cap.downloads=downloads;
-    if(user){try{isAdmin=await user.canEdit()||await user.isOwner();}catch(e){}
-      try{state.uid=await user.id();}catch(e){}}
+    if(user){try{state.uid=await user.id();}catch(e){}}
   }
-  if(isAdmin){
-    const eye=$('#eyeBtn');eye.hidden=false;
-    eye.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-    eye.onclick=()=>setPreview(!previewGuest);
-    $('#pvExit').onclick=()=>setPreview(false);
-    const cfg=$('#cfgBtn');cfg.hidden=false;
-    cfg.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
-    cfg.onclick=openSettings;
-    const ib=$('#inboxBtn');ib.hidden=false;ib.onclick=openInbox;
-  }
+  const eye=$('#eyeBtn');
+  eye.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  eye.onclick=()=>setPreview(!previewGuest);
+  $('#pvExit').onclick=()=>setPreview(false);
+  const cfg=$('#cfgBtn');
+  cfg.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+  cfg.onclick=openSettings;
+  $('#inboxBtn').onclick=openInbox;
+  $('#authBtn').onclick=()=>loggedIn?logout():openLogin();
+  loggedIn=isAuthed();isAdmin=loggedIn;
   syncAdminUI();
-  if(cap.db){dbReady=true;subscribeAlbums();subscribeSettings();if(isAdmin)subscribeBookings();}
+  if(cap.db){dbReady=true;subscribeAlbums();subscribeSettings();if(loggedIn)subscribeBookings();}
   else{render();}
 }
 function subscribeBookings(){
@@ -545,13 +635,18 @@ function subscribeSettings(){
 }
 function setPreview(on){previewGuest=on;syncAdminUI();render();window.scrollTo(0,0);}
 function syncAdminUI(){
-  $('#adminChip').hidden=!canAdmin();
-  $('#cfgBtn').hidden=!canAdmin();
-  const ib=$('#inboxBtn');if(ib)ib.hidden=!canAdmin();
+  const ca=canAdmin();
+  $('#adminChip').hidden=!ca;
+  $('#cfgBtn').hidden=!ca;
+  const ib=$('#inboxBtn');if(ib)ib.hidden=!ca;
+  $('#eyeBtn').hidden=!isAdmin;
   updateInboxBadge();
   $('#eyeBtn').classList.toggle('on',previewGuest);
   $('#eyeBtn').title=previewGuest?'Đang xem như Khách':'Xem như Khách';
   $('#pvbar').hidden=!previewGuest;
+  const auth=$('#authBtn');
+  if(auth){auth.innerHTML=loggedIn?LOGOUT_SVG:LOGIN_SVG;
+    auth.title=loggedIn?'Đăng xuất':'Đăng nhập quản trị';auth.classList.toggle('on',loggedIn);}
 }
 
 /* ============ state + data ============ */
@@ -886,11 +981,52 @@ async function delReview(id){
 
 /* ============ render ============ */
 function render(){
-  const app=$('#app');
-  $('#searchBox').style.visibility=state.albumId?'hidden':'visible';
-  if(state.albumId)renderAlbum(app);
+  const app=$('#app');const h=location.hash;const onPricing=(h==='#/pricing');
+  $('#searchBox').style.visibility=(state.albumId||onPricing)?'hidden':'visible';
+  const nh=$('#navHome'),np=$('#navPrice');
+  if(nh){nh.classList.toggle('active',!onPricing);np.classList.toggle('active',onPricing);}
+  if(onPricing)renderPricing(app);
+  else if(state.albumId)renderAlbum(app);
   else renderHome(app);
   renderFooter();
+}
+const PRICING=[
+  {name:'GÓI MINI',price:'3.000.000đ',color:'#2E86C9',icon:'⏱️',
+   feats:['Thời gian: 2 giờ','Không giới hạn lượt chụp','In ảnh tối đa: 120 ảnh','1 nhân sự hỗ trợ'],
+   note:'Chụp thêm 1h + 1,2 triệu'},
+  {name:'GÓI BASIC',price:'3.500.000đ',color:'#16b981',icon:'⭐',
+   feats:['Thời gian: 2.5 giờ','Không giới hạn lượt chụp','In ảnh tối đa: 200 ảnh','Phụ kiện cơ bản: kính mắt, cài tóc…','Sổ dán ảnh cơ bản','2 nhân sự hỗ trợ'],
+   note:'In thêm ngoài giờ + 10k/ảnh'},
+  {name:'GÓI PRO',price:'4.200.000đ',color:'#f59e0b',icon:'👑',popular:true,
+   feats:['Thời gian: 3 giờ','Không giới hạn lượt chụp','In không giới hạn','Phụ kiện: kính mắt, cài tóc…','Sổ dán ảnh VIP','Tranh vân tay 40x60','2 nhân sự hỗ trợ'],
+   note:'Thêm 1 sổ thường 250k'},
+  {name:'GÓI PREMIUM',price:'5.000.000đ',color:'#ec4899',icon:'💎',
+   feats:['Thời gian: 3.5 giờ','Không giới hạn lượt chụp','In ảnh không giới hạn','Phụ kiện: mắt kính, cài tóc…','Sổ dán ảnh VIP','Tranh vân tay 40x60','2 nhân sự hỗ trợ'],
+   note:'Thêm 1 sổ VIP 400k'},
+];
+const EXTRAS=[
+  {name:'MÓC KHOÁ',rows:[['50 cái','1tr'],['100 cái','1tr5'],['Không giới hạn','2tr']]},
+  {name:'TRANH VÂN TAY',rows:[['40x60','500k'],['50x70','800k'],['60x90','1tr']]},
+  {name:'BÓNG KÍCH NỔ',sub:'(Chỉ nhận ở Nghệ An)',rows:[['Hoa hồng','800k/quả'],['Lồng Vũ','1tr/quả']]},
+];
+function renderPricing(app){
+  const tiers=PRICING.map(p=>`<div class="tier${p.popular?' pop':''}" style="--tc:${p.color}">
+    ${p.popular?'<div class="tier-pop">PHỔ BIẾN</div>':''}
+    <div class="tier-head"><h3>${esc(p.name)}</h3><span class="tier-ic">${p.icon}</span></div>
+    <div class="tier-price">${esc(p.price)}</div>
+    <ul class="tier-feats">${p.feats.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+    <button class="btn tier-btn" onclick="openBooking()">Chọn gói này</button>
+    <div class="tier-note">${esc(p.note)}</div></div>`).join('');
+  const extras=EXTRAS.map(x=>`<div class="xcard"><h4>${esc(x.name)}</h4>${x.sub?`<div class="xsub">${esc(x.sub)}</div>`:''}
+    <div class="xrows">${x.rows.map(r=>`<div class="xrow"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join('')}</div></div>`).join('');
+  app.innerHTML=`<div class="phead">
+      <div class="kick">Young Booth · Báo giá dịch vụ</div>
+      <h2 class="ptitle">Báo giá dịch vụ Photobooth</h2>
+      <p>Chọn gói phù hợp cho sự kiện của bạn — chụp hình in ảnh lấy liền, phụ kiện &amp; nhân sự đầy đủ. Bấm “Chọn gói” để gửi yêu cầu ngay.</p>
+    </div>
+    <div class="tiers">${tiers}</div>
+    <div class="sechead"><h2>Bảng giá dịch vụ khác</h2></div>
+    <div class="xgrid">${extras}</div>`;
 }
 
 function coverOf(a){
@@ -908,7 +1044,6 @@ function coverHTML(a){const c=coverOf(a);
 function renderHome(app){
   let html=`
   <section class="hero">
-    <div class="kick">Young Booth · GIF · Boomerang · 360° · Slow-mo · Green screen</div>
     <h1>Bắt trọn mọi <span class="hl">khoảnh khắc</span>, lấy ảnh liền tay.</h1>
     <p>Chọn sự kiện của bạn để xem và tải toàn bộ ảnh photobooth — miễn phí, chất lượng gốc. Chụp hình in ảnh lấy liền cho tiệc cưới &amp; sự kiện.</p>
     <div class="contact">
